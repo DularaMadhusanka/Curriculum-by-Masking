@@ -41,7 +41,7 @@ Curriculum Schedule: Gradually increasing the masking ratio using a "Linear Repe
 
 Clone the repository:
 
-git clone [https://github.com/your-username/cbm-reproduction.git](https://github.com/your-username/cbm-reproduction.git)
+git clone [https://github.com/DularaMadhusanka/Curriculum-by-Masking.git](https://github.com/DularaMadhusanka/Curriculum-by-Masking.git)
 cd cbm-reproduction
 
 
