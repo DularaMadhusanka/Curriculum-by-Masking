@@ -1,99 +1,112 @@
-CBM: Curriculum by Masking (Unofficial PyTorch Implementation)
+# CBM: Curriculum by Masking (Unofficial PyTorch Implementation)
 
-This repository contains a PyTorch reproduction of the research paper "CBM: Curriculum by Masking" (Jarcă et al., 2024).
+[![Paper](https://img.shields.io/badge/arXiv-2407.05193-B31B1B.svg?style=flat-square&logo=arxiv&logoColor=white)](https://arxiv.org/abs/2407.05193)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Python 3.8+](https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
 
-It implements a novel Curriculum Learning strategy that creates an "easy-to-hard" training schedule by masking image patches based on their Gradient Magnitude (Salience).
+An unofficial PyTorch reproduction of the research paper **"CBM: Curriculum by Masking"** (*Jarcă et al., 2024*).
 
-📄 Paper Summary
+This repository implements a Curriculum Learning strategy designed to improve model generalization. It builds an "easy-to-hard" training progression by dynamically masking image patches based on their spatial saliency (gradient magnitude).
 
-Curriculum by Masking (CBM) improves model generalization by:
+---
 
-Gradient-Based Masking: Calculating image gradients to identify salient regions (e.g., edges, objects) and masking them probabilistically.
+## 📖 Paper Summary
 
-Curriculum Schedule: Gradually increasing the masking ratio using a "Linear Repeat" (sawtooth) schedule to prevent catastrophic forgetting.
+**Curriculum by Masking (CBM)** enhances image classifier training through two core mechanisms:
 
-🚀 Features implemented
+1. **Gradient-Based Saliency Masking:** Calculates local image gradients to locate salient features (e.g., key edges, object boundaries) and probabilistically masks high-saliency patches during training.
+2. **Linear Repeat Schedule:** Gradually increases the masking ratio using a Fibonacci-inspired sawtooth pattern. This progressive difficulty prevents catastrophic forgetting while pushing the network to learn robust contextual features.
 
-[x] Gradient Saliency Calculation: Pre-computes patch importance using Sobel filters.
+---
 
-[x] CBM Masking Engine: Custom ResNet-18 wrapper that applies probabilistic masking during the forward pass.
+## ✨ Key Features
 
-[x] Linear Repeat Schedule: Implements the Fibonacci-based sawtooth scheduling logic.
+- [x] **Saliency Pre-Computation:** Fast patch-importance generation using Sobel gradient filtering.
+- [x] **CBM ResNet Wrapper:** Custom `ResNet-18` architecture with integrated probabilistic masking layers in the forward pass.
+- [x] **Sawtooth Curriculum Scheduler:** Modular Fibonacci-based linear repeat schedule logic.
+- [x] **Automated Evaluation Suite:** Generates training curves, confusion matrices, and multi-class ROC/AUC plots automatically post-training.
 
-[x] Comprehensive Evaluation: Generates Training Curves, Confusion Matrices, and ROC/AUC plots automatically.
+---
 
-📂 Project Structure
+## 📂 Repository Structure
 
+```text
 .
-├── main.py                # Entry point for the experiment runner
-├── arguments.py           # Argument parsing and Schedule injection
-├── runs.py                # Configuration registry mapping models to datasets
-├── resnet_experiments.py  # Main experiment logic (Hyperparameters & Metrics)
-├── resnet_train.py        # The Trainer class (Training loop & Logging)
-├── data_handlers.py       # CIFAR dataset class with Gradient Calculation
-├── fibonacci.py           # Helper for generating the schedule
-├── test.py                # Evaluation loop
+├── main.py                 # Primary entry point to launch experiments
+├── arguments.py            # CLI argument parsing and schedule injection
+├── runs.py                 # Registry mapping model architectures to datasets
+├── resnet_experiments.py   # Experiment coordination, hyperparameter setup, and metrics
+├── resnet_train.py        # Trainer class handling the training loop and logging
+├── data_handlers.py        # Dataset wrappers with pre-computed gradient saliency
+├── fibonacci.py            # Helper module for generating Linear Repeat schedules
+├── test.py                 # Independent evaluation script
 └── models/
-    └── resnet.py          # ResNet-18 wrapper with CBM Masking Logic
+    └── resnet.py           # ResNet-18 model integrated with CBM masking logic
+```
 
+---
 
-🛠️ Installation
+## ⚙️ Installation
 
-Clone the repository:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/DularaMadhusanka/Curriculum-by-Masking.git
+   cd Curriculum-by-Masking
+   ```
 
-git clone [https://github.com/DularaMadhusanka/Curriculum-by-Masking.git](https://github.com/DularaMadhusanka/Curriculum-by-Masking.git)
-cd cbm-reproduction
+2. **Install dependencies:**
+   ```bash
+   pip install torch torchvision numpy opencv-python matplotlib seaborn scikit-learn tqdm einops
+   ```
 
+---
 
-Install the required dependencies:
+## 🚀 Quickstart & Usage
 
-pip install torch torchvision numpy opencv-python matplotlib seaborn scikit-learn tqdm einops
+Run the baseline CIFAR-10 training run with ResNet-18:
 
-
-🏃 Usage
-
-To run the reproduction experiment on CIFAR-10 with ResNet-18:
-
+```bash
 python main.py
+```
 
+### Execution Workflow
+1. Downloads the CIFAR-10 dataset (if not available locally).
+2. Pre-computes Sobel gradient probabilities across the training dataset.
+3. Trains `ResNet-18` for 100 epochs using the CBM Linear Repeat schedule.
+4. Saves figures to `plots/` and weights to `saved_models/`.
 
-This command will:
+### Custom Arguments
+Extend or override hyperparameters via command line arguments:
 
-Download CIFAR-10 (if not present).
-
-Pre-compute gradient probabilities for the training set.
-
-Train ResNet-18 for 100 epochs using the Linear Repeat schedule.
-
-Generate evaluation plots in the plots/ directory.
-
-Custom Arguments
-
-You can modify hyperparameters in arguments.py or pass them via command line (if extended):
-
-# Example (if arguments are exposed in main.py)
+```bash
 python main.py --model_name resnet18 --dataset cifar10
+```
 
+---
 
-📊 Results & Outputs
+## 📊 Results & Artifacts
 
-After training, the script generates the following visualizations in the plots/ folder:
+Upon completion, all diagnostic plots are automatically saved to the `plots/` directory:
 
-training_curves.png: Loss and Accuracy over epochs.
+| Artifact | Description |
+| :--- | :--- |
+| `plots/training_curves.png` | Epoch-wise train/validation loss and accuracy trajectories. |
+| `plots/confusion_matrix.png` | Normalized heatmaps for true vs. predicted class distributions. |
+| `plots/roc_auc_curves.png` | One-vs-Rest multi-class ROC curves and area-under-curve metrics. |
+| `saved_models/r18_cif10_100ep.pth` | Checkpoint containing model weights and optimizer state. |
 
-confusion_matrix.png: Heatmap of predicted vs. true classes.
+---
 
-roc_auc_curves.png: Multi-class ROC curves with AUC scores.
+## 📜 Citation
 
-The best model checkpoint is saved to saved_models/r18_cif10_100ep.pth.
+If you use this reproduction or reference the original paper, please cite:
 
-📜 Citation
-
-This code is a reproduction based on the original work:
-
+```bibtex
 @article{jarca2024cbm,
-  title={CBM: Curriculum by Masking},
-  author={Jarcă, Andrei and Croitoru, Florinel-Alin and Ionescu, Radu Tudor},
-  journal={arXiv preprint arXiv:2407.05193},
-  year={2024}
+  title   = {CBM: Curriculum by Masking},
+  author  = {Jarc{\u{a}}, Andrei and Croitoru, Florinel-Alin and Ionescu, Radu Tudor},
+  journal = {arXiv preprint arXiv:2407.05193},
+  year    = {2024}
 }
+```
